@@ -1,7 +1,7 @@
 #include "postgres.h"
 
 #include <float.h>
-
+#include <sys/mman.h>
 #include "catalog/index.h"
 #include "ivfflat.h"
 #include "miscadmin.h"
@@ -37,7 +37,8 @@
 #else
 #define UpdateProgress(index, val) ((void)val)
 #endif
-
+void createArrayMem (const char* name, const int SIZE,const float message);
+void addArrayMem (const char* name, const int SIZE,const float message);
 /*
  * Add sample
  */
@@ -621,6 +622,13 @@ static void
 BuildIndex(Relation heap, Relation index, IndexInfo *indexInfo,
 		   IvfflatBuildState * buildstate, ForkNumber forkNum)
 {
+
+// createArrayMem ("xb_tttt", 4096,1.23);
+// addArrayMem ("xb_tttt", 4096,5.32);
+// addArrayMem ("xb_tttt", 4096,8.88);
+
+
+
 	InitBuildState(buildstate, heap, index, indexInfo);
 
 	ComputeCenters(buildstate);
@@ -661,4 +669,41 @@ ivfflatbuildempty(Relation index)
 	IvfflatBuildState buildstate;
 
 	BuildIndex(NULL, index, indexInfo, &buildstate, INIT_FORKNUM);
+}
+
+void addArrayMem (const char* name, const int SIZE,const float message){
+    /* pointer to shared memory object */
+    void* ptr;
+    bool  found;
+
+    ptr = ShmemInitStruct(name, SIZE, &found);
+
+    if(found){
+        /* read from the shared memory object */
+        float* fptr = (float*)ptr;
+		elog(NOTICE, "Pointer found!!, the current length is %ld",strlen(fptr)/sizeof(float));
+		fptr[strlen(fptr)/sizeof(float)] = message;
+		elog(NOTICE, "the new length is %ld",strlen(fptr)/sizeof(float));
+    }
+	else{
+	elog(NOTICE, "Pointer not found!!");
+	}
+}
+
+void createArrayMem (const char* name, const int SIZE,const float message){
+    /* pointer to shared memory object */
+    void* ptr;
+    bool found;
+
+    ptr = ShmemInitStruct(name, SIZE, &found);
+
+    if(!found){
+        /* write to the shared memory object */
+		elog(NOTICE, "Creating New Pointer!!");
+        float* fptr = (float*)ptr;
+        fptr[0] = message;
+    }
+	else{
+		elog(NOTICE, "Pointer found!!");
+	}
 }

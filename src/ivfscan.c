@@ -1,7 +1,6 @@
 #include "postgres.h"
-
 #include <float.h>
-
+#include <sys/mman.h>
 #include "access/relscan.h"
 #include "ivfflat.h"
 #include "miscadmin.h"
@@ -10,6 +9,7 @@
 
 #include "catalog/pg_operator_d.h"
 #include "catalog/pg_type_d.h"
+float* readArrayMem (const char* name, const int SIZE);
 
 /*
  * Compare list distances
@@ -348,8 +348,13 @@ ivfflatgettuple(IndexScanDesc scan, ScanDirection dir)
 void
 ivfflatendscan(IndexScanDesc scan)
 {
+	// float* dataPtrFromMem;
+	// dataPtrFromMem=readArrayMem("xb_tttt",4096);
+	// printf("First float: %f\n", dataPtrFromMem[0]);
+    // printf("Second float: %f\n", dataPtrFromMem[1]);
+	// printf("Third float: %f\n", dataPtrFromMem[2]);
+	
 	IvfflatScanOpaque so = (IvfflatScanOpaque) scan->opaque;
-
 	/* Release pin */
 	if (BufferIsValid(so->buf))
 		ReleaseBuffer(so->buf);
@@ -359,4 +364,79 @@ ivfflatendscan(IndexScanDesc scan)
 
 	pfree(so);
 	scan->opaque = NULL;
+}
+
+float* readArrayMem (const char* name, const int SIZE){
+    /* pointer to shared memory object */
+    void* ptr;
+    bool  found;
+
+    ptr = ShmemInitStruct(name, SIZE, &found);
+
+    if(found){
+        /* read from the shared memory object */
+        float* fptr = (float*)ptr;
+		elog(NOTICE, "Pointer found!!, the length is %ld",strlen(fptr)/sizeof(float));
+
+		return fptr;
+		shm_unlink(name);
+    }
+	else{
+	elog(NOTICE, "Pointer not found!!");
+	}
+}
+#include "/home/zhan4404/research/pase/postgresql-11.0/contrib/pgvector/hnswlib/hnswlib/hnswlib.h"
+void test(){
+	int dim = 16;               // Dimension of the elements
+    int max_elements = 10000;   // Maximum number of elements, should be known beforehand
+    int M = 16;                 // Tightly connected with internal dimensionality of the data
+                                // strongly affects the memory consumption
+    int ef_construction = 200;  // Controls index search speed/build speed tradeoff
+
+    // Initing index
+    hnswlib::L2Space space(dim);
+    hnswlib::HierarchicalNSW<float>* alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, max_elements, M, ef_construction);
+
+    // Generate random data
+    std::mt19937 rng;
+    rng.seed(47);
+    std::uniform_real_distribution<> distrib_real;
+    float* data = new float[dim * max_elements];
+    for (int i = 0; i < dim * max_elements; i++) {
+        data[i] = distrib_real(rng);
+    }
+
+    // Add data to index
+    for (int i = 0; i < max_elements; i++) {
+        alg_hnsw->addPoint(data + i * dim, i);
+    }
+
+    // Query the elements for themselves and measure recall
+    float correct = 0;
+    for (int i = 0; i < max_elements; i++) {
+        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + i * dim, 1);
+        hnswlib::labeltype label = result.top().second;
+        if (label == i) correct++;
+    }
+    float recall = correct / max_elements;
+    std::cout << "Recall: " << recall << "\n";
+
+    // Serialize index
+    std::string hnsw_path = "hnsw.bin";
+    alg_hnsw->saveIndex(hnsw_path);
+    delete alg_hnsw;
+
+    // Deserialize index and check recall
+    alg_hnsw = new hnswlib::HierarchicalNSW<float>(&space, hnsw_path);
+    correct = 0;
+    for (int i = 0; i < max_elements; i++) {
+        std::priority_queue<std::pair<float, hnswlib::labeltype>> result = alg_hnsw->searchKnn(data + i * dim, 1);
+        hnswlib::labeltype label = result.top().second;
+        if (label == i) correct++;
+    }
+    recall = (float)correct / max_elements;
+    std::cout << "Recall of deserialized index: " << recall << "\n";
+
+    delete[] data;
+    delete alg_hnsw;
 }
