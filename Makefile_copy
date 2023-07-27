@@ -3,7 +3,7 @@ EXTVERSION = 0.4.4
 
 MODULE_big = vector
 DATA = $(wildcard sql/*--*.sql)
-OBJS = src/ivfbuild.o src/ivfflat.o src/ivfinsert.o src/ivfkmeans.o src/ivfscan.o src/ivfutils.o src/ivfvacuum.o src/vector.o src/hnsw_wrapper.o
+OBJS = src/ivfbuild.o src/ivfflat.o src/ivfinsert.o src/ivfkmeans.o src/ivfscan.o src/ivfutils.o src/ivfvacuum.o src/vector.o
 
 TESTS = $(wildcard test/sql/*.sql)
 REGRESS = $(patsubst test/sql/%.sql,%,$(TESTS))
@@ -14,6 +14,7 @@ OPTFLAGS = -march=native
 # Mac ARM doesn't support -march=native
 ifeq ($(shell uname -s), Darwin)
 	ifeq ($(shell uname -p), arm)
+		# no difference with -march=armv8.5-a
 		OPTFLAGS =
 	endif
 endif
@@ -23,6 +24,9 @@ ifneq ($(filter ppc64%, $(shell uname -m)), )
 	OPTFLAGS =
 endif
 
+# For auto-vectorization:
+# - GCC (needs -ftree-vectorize OR -O3) - https://gcc.gnu.org/projects/tree-ssa/vectorization.html
+# - Clang (could use pragma instead) - https://llvm.org/docs/Vectorizers.html
 PG_CFLAGS += $(OPTFLAGS) -ftree-vectorize -fassociative-math -fno-signed-zeros -fno-trapping-math
 
 # Debug GCC auto-vectorization
@@ -30,9 +34,6 @@ PG_CFLAGS += $(OPTFLAGS) -ftree-vectorize -fassociative-math -fno-signed-zeros -
 
 # Debug Clang auto-vectorization
 # PG_CFLAGS += -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize
-
-# Link against C++ standard library
-PG_LIBS += -lstdc++
 
 all: sql/$(EXTENSION)--$(EXTVERSION).sql
 
@@ -44,10 +45,6 @@ EXTRA_CLEAN = sql/$(EXTENSION)--$(EXTVERSION).sql
 PG_CONFIG ?= /home/zhan4404/research/pase/postgresql-11.0/build/bin/pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
-
-# Implicit rule for building .o from .cpp files
-.cpp.o:
-	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # for Mac
 ifeq ($(PROVE),)

@@ -41,7 +41,43 @@ int main() {
 
     return 0;
 }
+void test(){
+    srand(time(NULL));  // initialize the random seed
 
+    // create a new HNSW index
+    HnswIndex index = hnsw_new();
+
+    // allocate memory for the data
+    float (*data)[DIMENSIONS] = malloc(sizeof(float[DIMENSIONS]) * NUM_POINTS);
+
+    // generate random data and add to the index
+    for (int i = 0; i < NUM_POINTS; ++i) {
+        for (int j = 0; j < DIMENSIONS; ++j) {
+            data[i][j] = (float)rand() / (float)RAND_MAX;
+        }
+        hnsw_addPoint(index, data[i], i);
+    }
+
+    // allocate memory for the labels and distances
+    int (*labels)[K] = malloc(sizeof(int[K]) * NUM_POINTS);
+    float (*distances)[K] = malloc(sizeof(float[K]) * NUM_POINTS);
+
+    // search for the K nearest neighbors of each point
+    for (int i = 0; i < NUM_POINTS; ++i) {
+        hnsw_searchKnn(index, data[i], K, labels[i], distances[i]);
+    }
+
+    hnsw_saveIndex(index, "index.bin");
+    hnsw_delete(index);
+
+    free(data);
+    free(labels);
+    free(distances);
+
+
+
+
+}
 // void test(){
 // 	int dim = 16;               // Dimension of the elements
 //     int max_elements = 10000;   // Maximum number of elements, should be known beforehand
