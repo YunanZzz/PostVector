@@ -1,0 +1,210 @@
+zhan4404@dbserver3:~/research/pase/pgvectorTest/postgresql-11.0/contrib/PostVector$ make
+gcc -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard -Wno-format-truncation -Wno-stringop-truncation -O3 -fPIC -I. -I./ -I/home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server -I/home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/internal  -D_GNU_SOURCE   -c -o src/hnswbuild.o src/hnswbuild.c
+In file included from src/hnswbuild.c:6:
+src/hnswflat.h:28: warning: "RAND_MAX" redefined
+   28 | #define RAND_MAX        0x7fffffff
+      | 
+In file included from /home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/c.h:60,
+                 from /home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/postgres.h:46,
+                 from src/hnswbuild.c:1:
+/usr/include/stdlib.h:87: note: this is the location of the previous definition
+   87 | #define RAND_MAX        2147483647
+      | 
+src/hnswbuild.c: In function ‘SetDefaultProbas’:
+src/hnswbuild.c:59:27: warning: implicit declaration of function ‘log’ [-Wimplicit-function-declaration]
+   59 |   float levelMult = 1.0 / log(buildstate->base_nb_num);
+      |                           ^~~
+src/hnswbuild.c:28:1: note: include ‘<math.h>’ or provide a declaration of ‘log’
+   27 | #include "catalog/pg_type_d.h"
+  +++ |+#include <math.h>
+   28 | 
+src/hnswbuild.c:59:27: warning: incompatible implicit declaration of built-in function ‘log’ [-Wbuiltin-declaration-mismatch]
+   59 |   float levelMult = 1.0 / log(buildstate->base_nb_num);
+      |                           ^~~
+src/hnswbuild.c:59:27: note: include ‘<math.h>’ or provide a declaration of ‘log’
+src/hnswbuild.c:64:13: warning: implicit declaration of function ‘exp’ [-Wimplicit-function-declaration]
+   64 |     proba = exp(-level / levelMult) * (1 - exp(-1 / levelMult));
+      |             ^~~
+src/hnswbuild.c:64:13: note: include ‘<math.h>’ or provide a declaration of ‘exp’
+src/hnswbuild.c:64:13: warning: incompatible implicit declaration of built-in function ‘exp’ [-Wbuiltin-declaration-mismatch]
+src/hnswbuild.c:64:13: note: include ‘<math.h>’ or provide a declaration of ‘exp’
+src/hnswbuild.c: In function ‘HnswFormDataTuple’:
+src/hnswbuild.c:106:30: error: ‘opts’ undeclared (first use in this function)
+  106 |     res->level = RandomLevel(opts);
+      |                              ^~~~
+src/hnswbuild.c:106:30: note: each undeclared identifier is reported only once for each function it appears in
+src/hnswbuild.c:108:31: error: ‘level’ undeclared (first use in this function)
+  108 |     buildstate->edgetuples += level + 2;
+      |                               ^~~~~
+src/hnswbuild.c:86:10: warning: unused variable ‘dest’ [-Wunused-variable]
+   86 |     char dest[1024 * 1024];
+      |          ^~~~
+src/hnswbuild.c:85:11: warning: unused variable ‘rawData’ [-Wunused-variable]
+   85 |     char *rawData;
+      |           ^~~~~~~
+src/hnswbuild.c:83:17: warning: unused variable ‘len’ [-Wunused-variable]
+   83 |     int dim, i, len;
+      |                 ^~~
+src/hnswbuild.c:82:11: warning: unused variable ‘rawText’ [-Wunused-variable]
+   82 |     text *rawText;
+      |           ^~~~~~~
+src/hnswbuild.c: In function ‘BuildCallback’:
+src/hnswbuild.c:165:93: error: ‘HnswflatBuildState’ has no member named ‘state’
+  165 |              HnswflatAppendPage(index, &buildstate->cbuf, &buildstate->cpage, &buildstate->state, MAIN_FORKNUM);
+      |                                                                                          ^~
+
+In file included from /home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/access/heapam.h:21,
+                 from /home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/nodes/execnodes.h:18,
+                 from /home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/catalog/index.h:18,
+                 from src/hnswbuild.c:5:
+src/hnswbuild.c:168:25: warning: passing argument 1 of ‘PageAddItemExtended’ from incompatible pointer type [-Wincompatible-pointer-types]
+  168 |         if (PageAddItem(&buildstate->cpage, (Item) tup, itemsz, InvalidOffsetNumber, false, false) == InvalidOffsetNumber)
+      |                         ^~~~~~~~~~~~~~~~~~
+      |                         |
+      |                         char **
+/home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/storage/bufpage.h:413:29: note: in definition of macro ‘PageAddItem’
+  413 |         PageAddItemExtended(page, item, size, offsetNumber, \
+      |                             ^~~~
+/home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/storage/bufpage.h:419:46: note: expected ‘Page’ {aka ‘char *’} but argument is of type ‘char **’
+  419 | extern OffsetNumber PageAddItemExtended(Page page, Item item, Size size,
+      |                                         ~~~~~^~~~
+src/hnswbuild.c:141:23: warning: unused variable ‘xlogstate’ [-Wunused-variable]
+  141 |     GenericXLogState *xlogstate;
+      |                       ^~~~~~~~~
+src/hnswbuild.c: In function ‘InitBuildState’:
+src/hnswbuild.c:211:21: error: ‘HnswflatBuildState’ has no member named ‘normprocinfo’; did you mean ‘procinfo’?
+  211 |         buildstate->normprocinfo = HnswflatOptionalProcInfo(index, HNSWFLAT_NORM_PROC);
+      |                     ^~~~~~~~~~~~
+      |                     procinfo
+src/hnswbuild.c:218:19: error: ‘HnswflatBuildState’ has no member named ‘tupdesc’
+  218 |         buildstate->tupdesc = CreateTemplateTupleDesc(4, false);
+      |                   ^~
+src/hnswbuild.c:220:38: error: ‘HnswflatBuildState’ has no member named ‘tupdesc’
+  220 |         TupleDescInitEntry(buildstate->tupdesc, (AttrNumber) 1, "level", INT4OID, -1, 0);
+      |                                      ^~
+src/hnswbuild.c:221:34: error: ‘HnswflatBuildState’ has no member named ‘tupdesc’
+  221 |     TupleDescInitEntry(buildstate->tupdesc, (AttrNumber) 2, "offset", INT8OID, -1, 0);
+      |                                  ^~
+src/hnswbuild.c:222:38: error: ‘HnswflatBuildState’ has no member named ‘tupdesc’
+  222 |         TupleDescInitEntry(buildstate->tupdesc, (AttrNumber) 3, "tid", TIDOID, -1, 0);
+      |                                      ^~
+src/hnswbuild.c:223:38: error: ‘HnswflatBuildState’ has no member named ‘tupdesc’
+  223 |         TupleDescInitEntry(buildstate->tupdesc, (AttrNumber) 4, "vector", RelationGetDescr(index)->attrs[0].atttypid, -1, 0);
+      |                                      ^~
+src/hnswbuild.c:228:19: error: ‘HnswflatBuildState’ has no member named ‘slot’
+  228 |         buildstate->slot = MakeSingleTupleTableSlot(buildstate->tupdesc);
+      |                   ^~
+src/hnswbuild.c:228:63: error: ‘HnswflatBuildState’ has no member named ‘tupdesc’
+  228 |         buildstate->slot = MakeSingleTupleTableSlot(buildstate->tupdesc);
+      |                                                               ^~
+src/hnswbuild.c: In function ‘CreateEntryPages’:
+src/hnswbuild.c:302:24: warning: implicit declaration of function ‘IvfflatNewBuffer’; did you mean ‘HnswflatNewBuffer’? [-Wimplicit-function-declaration]
+  302 |     buildstate->cbuf = IvfflatNewBuffer(buildstate->index, forkNum);
+      |                        ^~~~~~~~~~~~~~~~
+      |                        HnswflatNewBuffer
+src/hnswbuild.c:303:9: warning: implicit declaration of function ‘IvfflatInitRegisterPage’; did you mean ‘HnswflatInitRegisterPage’? [-Wimplicit-function-declaration]
+  303 |         IvfflatInitRegisterPage(buildstate->index, &buildstate->cbuf, &buildstate->cpage, &buildstate->state);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~
+      |         HnswflatInitRegisterPage
+src/hnswbuild.c:303:102: error: ‘HnswflatBuildState’ has no member named ‘state’
+  303 | fflatInitRegisterPage(buildstate->index, &buildstate->cbuf, &buildstate->cpage, &buildstate->state);
+      |                                                                                            ^~
+
+src/hnswbuild.c:309:5: warning: implicit declaration of function ‘IvfflatCommitBuffer’; did you mean ‘HnswflatCommitBuffer’? [-Wimplicit-function-declaration]
+  309 |     IvfflatCommitBuffer(buildstate->cbuf, buildstate->state);
+      |     ^~~~~~~~~~~~~~~~~~~
+      |     HnswflatCommitBuffer
+src/hnswbuild.c:309:53: error: ‘HnswflatBuildState’ has no member named ‘state’
+  309 |     IvfflatCommitBuffer(buildstate->cbuf, buildstate->state);
+      |                                                     ^~
+src/hnswbuild.c: In function ‘InmemoryLoad’:
+src/hnswbuild.c:350:55: error: ‘count’ undeclared (first use in this function)
+  350 |             hnsw_addPoint(hnsw_Index, vertex->vector, count);
+      |                                                       ^~~~~
+src/hnswbuild.c:357:21: warning: implicit declaration of function ‘IvfflatPageGetOpaque’; did you mean ‘HnswflatPageGetOpaque’? [-Wimplicit-function-declaration]
+  357 |         nextblkno = IvfflatPageGetOpaque(cpage)->nextblkno;
+      |                     ^~~~~~~~~~~~~~~~~~~~
+      |                     HnswflatPageGetOpaque
+src/hnswbuild.c:357:48: error: invalid type argument of ‘->’ (have ‘int’)
+  357 |         nextblkno = IvfflatPageGetOpaque(cpage)->nextblkno;
+      |                                                ^~
+src/hnswbuild.c:334:21: warning: unused variable ‘i’ [-Wunused-variable]
+  334 |         int         i;
+      |                     ^
+src/hnswbuild.c:332:17: warning: unused variable ‘itemsz’ [-Wunused-variable]
+  332 |     Size        itemsz;
+      |                 ^~~~~~
+src/hnswbuild.c:331:17: warning: unused variable ‘edgeStartPage’ [-Wunused-variable]
+  331 |     BlockNumber edgeStartPage;
+      |                 ^~~~~~~~~~~~~
+src/hnswbuild.c:330:22: warning: unused variable ‘meta’ [-Wunused-variable]
+  330 |     HnswflatMetaPage meta;
+      |                      ^~~~
+src/hnswbuild.c:329:18: warning: unused variable ‘edge’ [-Wunused-variable]
+  329 |     HnswflatEdge edge;
+      |                  ^~~~
+src/hnswbuild.c:325:23: warning: unused variable ‘state’ [-Wunused-variable]
+  325 |     GenericXLogState *state;
+      |                       ^~~~~
+src/hnswbuild.c: In function ‘CreateEdgePages’:
+src/hnswbuild.c:392:5: error: ‘edgeStartPage’ undeclared (first use in this function)
+  392 |     edgeStartPage = BufferGetBlockNumber(cbuf);
+      |     ^~~~~~~~~~~~~
+src/hnswbuild.c:397:25: error: ‘_level’ undeclared (first use in this function)
+  397 |         for (j = 0; j < _level[i] + 1; j++)
+      |                         ^~~~~~
+In file included from /home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/access/heapam.h:21,
+                 from /home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/nodes/execnodes.h:18,
+                 from /home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/catalog/index.h:18,
+                 from src/hnswbuild.c:5:
+src/hnswbuild.c:414:37: warning: passing argument 1 of ‘PageAddItemExtended’ from incompatible pointer type [-Wincompatible-pointer-types]
+  414 |                     if (PageAddItem(&cpage, (Item) edge, itemsz, InvalidOffsetNumber, false, false) == InvalidOffsetNumber)
+      |                                     ^~~~~~
+      |                                     |
+      |                                     char **
+/home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/storage/bufpage.h:413:29: note: in definition of macro ‘PageAddItem’
+  413 |         PageAddItemExtended(page, item, size, offsetNumber, \
+      |                             ^~~~
+/home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/storage/bufpage.h:419:46: note: expected ‘Page’ {aka ‘char *’} but argument is of type ‘char **’
+  419 | extern OffsetNumber PageAddItemExtended(Page page, Item item, Size size,
+      |                                         ~~~~~^~~~
+In file included from /home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/postgres.h:47,
+                 from src/hnswbuild.c:1:
+/home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/utils/rel.h:443:28: error: request for member ‘rd_rel’ in something not a structure or union
+  443 |         (NameStr((relation)->rd_rel->relname))
+      |                            ^~
+/home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/utils/elog.h:202:37: note: in definition of macro ‘elog’
+  202 |                 elog_finish(elevel, __VA_ARGS__); \
+      |                                     ^~~~~~~~~~~
+/home/zhan4404/research/pase/pgvectorTest/postgresql-11.0/build/include/server/utils/rel.h:443:10: note: in expansion of macro ‘NameStr’
+  443 |         (NameStr((relation)->rd_rel->relname))
+      |          ^~~~~~~
+src/hnswbuild.c:415:79: note: in expansion of macro ‘RelationGetRelationName’
+  415 |                             elog(ERROR, "failed to add index item to \"%s\"", RelationGetRelationName(index));
+      |                                                                               ^~~~~~~~~~~~~~~~~~~~~~~
+src/hnswbuild.c:428:5: error: ‘meta’ undeclared (first use in this function)
+  428 |     meta = (HnswflatMetaPage) PageGetItem(cpage, PageGetItemId(cpage, FirstOffsetNumber));
+      |     ^~~~
+src/hnswbuild.c: In function ‘BuildIndex’:
+src/hnswbuild.c:453:75: error: ‘buildstate’ is a pointer; did you mean to use ‘->’?
+  453 |     HnswIndex HNSW_index = hnsw_new(buildstate->dimensions,(int)buildstate.reltuples,buildstate->base_nb_num,buildstate->ef_build);
+      |                                                                           ^
+      |                                                                           ->
+src/hnswbuild.c:453:5: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
+  453 |     HnswIndex HNSW_index = hnsw_new(buildstate->dimensions,(int)buildstate.reltuples,buildstate->base_nb_num,buildstate->ef_build);
+      |     ^~~~~~~~~
+src/hnswbuild.c: At top level:
+src/hnswbuild.c:467:1: warning: no previous prototype for ‘hnswflatbuild’ [-Wmissing-prototypes]
+  467 | hnswflatbuild(Relation heap, Relation index, IndexInfo *indexInfo)
+      | ^~~~~~~~~~~~~
+src/hnswbuild.c:485:1: warning: no previous prototype for ‘hnswflatbuildempty’ [-Wmissing-prototypes]
+  485 | hnswflatbuildempty(Relation index)
+      | ^~~~~~~~~~~~~~~~~~
+src/hnswbuild.c:379:1: warning: ‘CreateEdgePages’ defined but not used [-Wunused-function]
+  379 | CreateEdgePages(HnswflatBuildState * buildstate, ForkNumber forkNum)
+      | ^~~~~~~~~~~~~~~
+src/hnswbuild.c:368:1: warning: ‘InmemoryCompute’ defined but not used [-Wunused-function]
+  368 | InmemoryCompute(HnswflatBuildState * buildstate)
+      | ^~~~~~~~~~~~~~~
+make: *** [<builtin>: src/hnswbuild.o] Error 1
+
