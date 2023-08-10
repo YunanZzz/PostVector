@@ -218,6 +218,12 @@ CREATE ACCESS METHOD ivfflat TYPE INDEX HANDLER ivfflathandler;
 
 COMMENT ON ACCESS METHOD ivfflat IS 'ivfflat index access method';
 
+CREATE FUNCTION hnswflathandler(internal) RETURNS index_am_handler
+	AS 'MODULE_PATHNAME' LANGUAGE C;
+
+CREATE ACCESS METHOD hnswflat TYPE INDEX HANDLER hnswflathandler;
+
+COMMENT ON ACCESS METHOD hnswflat IS 'hnswflat index access method';
 -- opclasses
 
 CREATE OPERATOR CLASS vector_ops
@@ -231,6 +237,12 @@ CREATE OPERATOR CLASS vector_ops
 
 CREATE OPERATOR CLASS vector_l2_ops
 	DEFAULT FOR TYPE vector USING ivfflat AS
+	OPERATOR 1 <-> (vector, vector) FOR ORDER BY float_ops,
+	FUNCTION 1 vector_l2_squared_distance(vector, vector),
+	FUNCTION 3 l2_distance(vector, vector);
+
+CREATE OPERATOR CLASS vector_l2_ops2
+	DEFAULT FOR TYPE vector USING hnswflat AS
 	OPERATOR 1 <-> (vector, vector) FOR ORDER BY float_ops,
 	FUNCTION 1 vector_l2_squared_distance(vector, vector),
 	FUNCTION 3 l2_distance(vector, vector);

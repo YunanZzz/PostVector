@@ -32,9 +32,9 @@ void hnsw_saveIndex(HnswIndex index, const char* path) {
 // void hnsw_loadIndex(HnswIndex index, const char* path) {
 //     static_cast<hnswlib::HierarchicalNSW<float>*>(index)->loadIndex(path);
 // }
-void hnsw_loadIndex(HnswIndex index, const char* path) {
-    hnswlib::SpaceInterface<float> *s = new hnswlib::L2Space(16);
-    size_t max_elements_i = 16;
+void hnsw_loadIndex(HnswIndex index, const char* path,int dim) {
+    hnswlib::SpaceInterface<float> *s = new hnswlib::L2Space(dim);
+    size_t max_elements_i = dim;
     static_cast<hnswlib::HierarchicalNSW<float>*>(index)->loadIndex(path, s, max_elements_i);
 }
 

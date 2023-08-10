@@ -1,5 +1,5 @@
 #include "postgres.h"
-
+#include "hnsw_wrapper.h"
 #include <float.h>
 
 #include "catalog/index.h"
@@ -84,8 +84,7 @@ HnswFormDataTuple(HnswflatBuildState *buildstate,
     float4 *data;
     char *rawData;
     char dest[1024 * 1024];
-    HnswflatVertex res = (HnswflatVertex) palloc(buildState->vertex_tuple_size);
-
+    HnswflatVertex res = (HnswflatVertex) palloc(buildstate->vertex_tuple_size);
     res->heap_ptr = *iptr;
     if (isnull[0]) {
         pfree(res);
@@ -116,7 +115,7 @@ HnswInitEdgeTuple(HnswflatBuildState *buildstate, int64 source_id)
 {
     int     i;
 
-    HnswflatEdge res = (HnswflatEdge)palloc(buildState->edge_tuple_size);
+    HnswflatEdge res = (HnswflatEdge)palloc(buildstate->edge_tuple_size);
 
     res->source_id = source_id;
 
@@ -154,10 +153,10 @@ BuildCallback(Relation index, CALLBACK_ITEM_POINTER, Datum *values,
 	/* Use memory context since detoast can allocate */
 	oldCtx = MemoryContextSwitchTo(buildstate->tmpCtx);
 
-	tup = HnswFormDataTuple(buildState, tid, values, isnull);
+	tup = HnswFormDataTuple(buildstate, tid, values, isnull);
     if (!tup) {
         MemoryContextSwitchTo(oldCtx);
-        MemoryContextReset(buildState->tmpctx);
+        MemoryContextReset(buildstate->tmpCtx);
         return;
     }
     /* Check for free space */
@@ -170,7 +169,7 @@ BuildCallback(Relation index, CALLBACK_ITEM_POINTER, Datum *values,
 		elog(ERROR, "failed to add index item to \"%s\"", RelationGetRelationName(index));
 
 	pfree(tup);
-    buildState->indtuples += 1;
+    buildstate->indtuples += 1;
 
 	/* Reset memory context */
 	MemoryContextSwitchTo(oldCtx);
@@ -319,7 +318,7 @@ CreateEntryPages(HnswflatBuildState * buildstate, ForkNumber forkNum)
  * neighbors array: array size is buildState->edgetuples. needs to be computed in next step.
  */
 static void
-InmemoryLoad(HnswflatBuildState * buildstate, ForkNumber forkNum)
+InmemoryLoad(HnswIndex * hnsw_Index, HnswflatBuildState * buildstate, ForkNumber forkNum)
 {
     Buffer		cbuf;
 	Page		cpage;
@@ -348,6 +347,7 @@ InmemoryLoad(HnswflatBuildState * buildstate, ForkNumber forkNum)
 		for (offno = FirstOffsetNumber; offno <= maxoffno; offno = OffsetNumberNext(offno))
         {
             vertex = (HnswflatVertex) PageGetItem(cpage, PageGetItemId(cpage, offno));
+            hnsw_addPoint(hnsw_Index, vertex->vector, count);
             /* TODO create in-memory hnsw structures when traversing vertex tuples
              * NOTICE currently I assume vertex id and level starts from 0. Not sure about how Faiss starts
              * Watch out when loading values of levels and neighbors
@@ -450,12 +450,13 @@ BuildIndex(Relation heap, Relation index, IndexInfo *indexInfo,
         buildstate->base_nb_num, buildstate->ef_build,
         buildstate->ef_search, forkNum);
 	CreateEntryPages(buildstate, forkNum);
-    InmemoryLoad(buildstate, forkNum);
+    HnswIndex HNSW_index = hnsw_new(buildstate->dimensions,(int)buildstate.reltuples,buildstate->base_nb_num,buildstate->ef_build);
+    InmemoryLoad(&HNSW_index,buildstate, forkNum);
 
     //TODO InmemoryCompute() call a function here to compute values of neighbors array
 
-    CreateEdgePages(buildstate, forkNum);
-
+    //CreateEdgePages(buildstate, forkNum);
+    hnsw_saveIndex(HNSW_index, "HNSWindex.bin");
 	FreeBuildState(buildstate);
 }
 

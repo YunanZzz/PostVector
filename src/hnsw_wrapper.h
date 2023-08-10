@@ -11,7 +11,7 @@ HnswIndex hnsw_new();
 void hnsw_addPoint(HnswIndex index, const float* datapoint, int label);
 void hnsw_searchKnn(HnswIndex index, const float* query_data, int k, int* labels, float* distances);
 void hnsw_saveIndex(HnswIndex index, const char* path);
-void hnsw_loadIndex(HnswIndex index, const char* path);
+void hnsw_loadIndex(HnswIndex index, const char* path,int dim);
 void hnsw_delete(HnswIndex index);
 
 #ifdef __cplusplus
